@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weatherwise | Current weather and AI advice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="masthead">
+      <a class="brand" href="{{ url_for('index') }}">weatherwise<span>.</span></a>
+      <p>Weather, made useful.</p>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">Live conditions</p>
+      <h1 id="page-title">Plan your day<br>with clarity.</h1>
+      <p class="lede">Get the current conditions for any city, then turn them into practical advice for your plans.</p>
+    </section>
+
+    <form class="search-form" method="post" novalidate>
+      <div class="field city-field">
+        <label for="city">City</label>
+        <input id="city" name="city" value="{{ city }}" placeholder="e.g. Bengaluru" autocomplete="address-level2" required>
+      </div>
+      <div class="field">
+        <label for="activity">What are you doing? <span>Optional</span></label>
+        <input id="activity" name="activity" value="{{ activity }}" placeholder="e.g. commuting by bike">
+      </div>
+      <button type="submit">Check weather <span aria-hidden="true">→</span></button>
+    </form>
+
+    {% if error %}
+      <div class="message error" role="alert">{{ error }}</div>
+    {% endif %}
+
+    {% if weather %}
+      <section class="results" aria-live="polite">
+        <article class="weather-card">
+          <div class="weather-topline">
+            <div>
+              <p class="place">{{ weather.city }}, {{ weather.country }}</p>
+              <p class="condition">{{ weather.description }}</p>
+            </div>
+            <img src="https://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="{{ weather.description }}">
+          </div>
+          <div class="temperature">{{ weather.temperature }}<sup>°C</sup></div>
+          <p class="feels">Feels like {{ weather.feels_like }}°C</p>
+          <dl class="metrics">
+            <div><dt>Humidity</dt><dd>{{ weather.humidity }}%</dd></div>
+            <div><dt>Wind</dt><dd>{{ weather.wind_speed }} km/h</dd></div>
+            <div><dt>Visibility</dt><dd>{{ weather.visibility_km if weather.visibility_km is not none else '—' }}{% if weather.visibility_km is not none %} km{% endif %}</dd></div>
+            <div><dt>Pressure</dt><dd>{{ weather.pressure }} hPa</dd></div>
+          </dl>
+        </article>
+
+        <article class="insight-card">
+          <p class="eyebrow">AI weather note</p>
+          {% if insight %}
+            <div class="insight-text">{{ insight }}</div>
+          {% elif ai_available %}
+            <p>Weather data is ready. The AI note is temporarily unavailable; check the conditions above before heading out.</p>
+          {% else %}
+            <p>Add a <code>GROQ_API_KEY</code> to <code>.env</code> to receive a personalized weather note here.</p>
+          {% endif %}
+        </article>
+      </section>
+    {% endif %}
+  </main>
+</body>
+</html>
